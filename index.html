@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- iOS全屏适配 -->
+    <meta name="format-detection" content="telephone=no"> <!-- 禁止自动识别手机号 -->
+    <title>小源接码 | 黑金版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        body {
+            background: #000;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* 去除APP内点击高亮 */
+        }
+        /* 开机界面（简化动画，适配APP性能） */
+        .splash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .splash h1 {
+            color: #d4af37;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        .splash p {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        .splash .wangwang {
+            color: #d4af37;
+            margin-bottom: 30px;
+        }
+        .progress {
+            width: 80%;
+            height: 3px;
+            background: #333;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #d4af37;
+            width: 0%;
+        }
+        .splash {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  /* 调整黑金渐变：加深黑色基调，降低金色占比 */
+  background: linear-gradient(135deg, #0d0a00 0%, #221800 100%); 
+  overflow: hidden;
+}
+
+/* 伪元素做微光动画：降低黄色饱和度，增强透明感 */
+.splash::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  /* 暗金色光效：降低饱和度，提高透明度 */
+  background: radial-gradient(rgba(218, 165, 32, 0.15), transparent);
+  border-radius: 50%;
+  /* 增加一个微弱的金色边框，强化科技感 */
+  box-shadow: 0 0 30px rgba(218, 165, 32, 0.1);
+  animation: gold-glow 12s linear infinite;
+}
+
+/* 新增一个反向流动的光效，增强层次感（可选） */
+.splash::after {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(rgba(218, 165, 32, 0.1), transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(218, 165, 32, 0.08);
+  animation: gold-glow-reverse 15s linear infinite;
+}
+@keyframes gold-glow {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  50% { transform: translate(180%, 180%) rotate(180deg) scale(1.3); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+}
+
+@keyframes gold-glow-reverse {
+  0% { transform: translate(200%, 200%) rotate(0deg) scale(1); }
+  50% { transform: translate(-80%, -80%) rotate(-180deg) scale(1.2); }
+  100% { transform: translate(200%, 200%) rotate(-360deg) scale(1); }
+}
+        /* 主界面 */
+        .main {
+            display: none;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 80px; /* 避免被APP底部导航遮挡 */
+        }
+        .title {
+            color: #d4af37;
+            text-align: center;
+            margin: 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .section {
+            background: #111;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .section h3 {
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #222;
+            color: #fff;
+            font-size: 16px;
+        }
+        button {
+            background: #222;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            cursor: pointer;
+        }
+        button:active {
+            background: #333; /* APP内点击反馈 */
+        }
+        .verify-box {
+            width: 100%;
+            padding: 40px 0;
+            background: #222;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            color: #aaa;
+        }
+        .pay-btn {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 18px;
+        }
+        /* 弹窗（适配APP弹窗层级） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* 确保在APP所有元素上方 */
+        }
+        .modal-content {
+            background: #111;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+        }
+        .modal-content .red {
+            color: #ff4d4f;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .modal-content .close {
+            margin-top: 15px;
+        }
+        /* 新增：金沙颗粒动态效果 */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* 颗粒纹理（用径向渐变模拟金沙颗粒） */
+  background-image: radial-gradient(
+    rgba(255, 218, 185, 0.2) 1px, 
+    transparent 1px
+  );
+  background-size: 30px 30px; /* 颗粒密度 */
+  /* 缓慢流动动画 */
+  animation: grainFlow 15s linear infinite;
+  pointer-events: none; /* 不影响交互 */
+  z-index: 0;
+}
+
+/* 颗粒流动动画 */
+@keyframes grainFlow {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 300px 300px;
+  }
+}
+
+    </style><style>
+  body {
+    /* 黑金色渐变，从上到下从黑过渡到深金 */
+    background: linear-gradient(to bottom, #000, #4B3621); 
+    margin: 0;
+    padding: 0;
+  }
+  body {
+  margin: 0; padding: 0;
+  background: #000; /* 或渐变，根据需求改 */
+  overflow: hidden;
+}
+body::before {
+  content: "";
+  position: fixed; /* 改为 fixed 全屏覆盖 */
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(255,215,0,0.1) 0%, 
+    rgba(255,184,53,0.05) 50%, 
+    rgba(255,215,0,0.1) 100%
+  );
+  filter: blur(2px);
+  animation: flow 10s linear infinite;
+  z-index: -1; /* 确保在内容下层 */
+}
+@keyframes flow {
+  0% { transform: translate(-25%, -25%) rotate(0deg); }
+  100% { transform: translate(-25%, -25%) rotate(360deg); }
+}
+
+</style>
+
+</head>
+<body>
+    <!-- 开机界面 -->
+    <div class="splash">
+        <h1>小源接码</h1>
+        <p>BLACK GOLD EDITION</p>
+        <div class="wangwang">旺旺：177095251</div>
+        <div class="progress">
+            <div class="progress-bar" id="bar"></div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="main">
+        <h3 class="title">༺【小源接码系统】༻</h3>
+         </h1><div>专业实卡接码平台抽3000张实卡在线收码</div>
+         <h1>仅需50元永久使用</h1>
+         <div>支持7天无理由退货</div>
+         <div>在线接码平台认准小源接码</div>
+         <div>旺旺管理员：177095251</div>
+        <div class="section">
+            <h3>🅾️填写手机号</h3>
+            <input type="text" placeholder="请输入手机号" id="phoneInput">
+            <button id="getCode">📬获取验证码</button>
+        </div>
+
+        <div class="section">
+            <h3></h3>
+            <button id="getPhone">📞获取手机号</button>
+            <h3>🅾️验证码信息</h3>
+            <div class="verify-box" id="verifyBox">📛暂未收到验证码</div>
+            
+            
+        </div>
+        <button id="getPhone">♻️刷新</button>
+        <a href="https://c.wss.cc/f/hob3rvmut0e" target="_blank">
+            <button class="pay-btn">支付宝支付50元激活APP →</button>
+        </a>
+    </div>
+    <!-- 弹窗 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="red">暂未激活</div>
+            <p>请在APP内激活后使用</p>
+            <p class="wangwang">如有疑问请添加旺旺号：177095251</p>
+            <button class="close" id="closeModal">关闭</button>
+        </div>
+    </div>
+    
+    <div>1.如有APP问题请联系旺旺管理反馈</div>
+    <script>
+        // 开机进度条逻辑（简化动画，避免APP性能问题）
+        window.onload = function() {
+            const bar = document.getElementById('bar');
+            let progress = 0;
+            const timer = setInterval(() => {
+                progress += 2;
+                bar.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    // 延迟进入主界面
+                    setTimeout(() => {
+                        document.querySelector('.splash').style.display = 'none';
+                        document.querySelector('.main').style.display = 'block';
+                    }, 500);
+                }
+            }, 30); // 总时长约2.5秒，适合APP启动速度
+        };
+        // 按钮交互（适配APP内点击事件）
+        document.getElementById('getCode').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'flex';
+        });
+
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        // 生成随机手机号
+        document.getElementById('getPhone').addEventListener('click', function() {
+            const prefixs = ['130', '131', '132', '133', '134', '135', '136', '137', '138', '139'];
+            const prefix = prefixs[Math.floor(Math.random() * prefixs.length)];
+            let suffix = '';
+            for (let i = 0; i < 8; i++) {
+                suffix += Math.floor(Math.random() * 10);
+            }
+            const phone = `+86 ${prefix}${suffix}`;
+            document.getElementById('phoneInput').value = phone;
+        });
+    </script>
+</body>
+</html>
+
+    
